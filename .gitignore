@@ -1,0 +1,12 @@
+﻿bin/
+obj/
+artifacts/
+.vs/
+.idea/
+*.user
+*.suo
+*.log
+Thumbs.db
+.DS_Store
+QuickShelf.exe.WebView2/
+**/EBWebView/

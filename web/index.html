@@ -1,0 +1,87 @@
+﻿<!DOCTYPE html>
+<html class="dark" lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>QuickShelf</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['-apple-system','BlinkMacSystemFont','"SF Pro Display"','"Inter"','sans-serif'],mono:['"JetBrains Mono"','ui-monospace','monospace'],display:['"Space Grotesk"','sans-serif']}}}};
+</script>
+<style>
+  html,body{width:100%;height:100%;margin:0;background:transparent!important;overflow:hidden}
+  .fade-text-right{mask-image:linear-gradient(to right,#000 0%,#000 calc(100% - 20px),transparent 100%);-webkit-mask-image:linear-gradient(to right,#000 0%,#000 calc(100% - 20px),transparent 100%);white-space:nowrap;overflow:hidden}
+  ::-webkit-scrollbar{display:none}*{-ms-overflow-style:none;scrollbar-width:none}
+  #process-list{overflow-y:auto!important;overscroll-behavior:contain;scrollbar-width:thin!important;scrollbar-color:rgba(255,255,255,.28) transparent!important;mask-image:none!important;-webkit-mask-image:none!important}
+  #process-list::-webkit-scrollbar{display:block!important;width:2px!important}
+  #process-list::-webkit-scrollbar-track{background:transparent}
+  #process-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.28);border-radius:999px}
+  .process-fade-overlay{position:absolute;inset:0;z-index:20;pointer-events:none;background:linear-gradient(to bottom,rgba(0,0,0,0) 0%,rgba(0,0,0,0) 80%,rgba(0,0,0,1) 100%)}
+  .row-slider-btn{width:0;opacity:0;transform:translateX(24px);margin-left:0;overflow:hidden;pointer-events:none;transition:width .25s cubic-bezier(.16,1,.3,1),opacity .2s cubic-bezier(.16,1,.3,1),transform .25s cubic-bezier(.16,1,.3,1),margin-left .25s cubic-bezier(.16,1,.3,1);will-change:width,opacity,transform;flex-shrink:0}
+  .group:hover .row-slider-btn{width:72px;opacity:1;transform:translateX(0);margin-left:8px;pointer-events:auto}
+  .row-main-content{transition:min-width .25s cubic-bezier(.16,1,.3,1)}
+</style>
+</head>
+<body class="text-white antialiased font-sans select-none h-screen w-screen overflow-hidden relative">
+<div class="relative z-20 w-full h-full">
+<aside class="relative w-full h-full bg-black flex flex-col text-white pt-4 pb-4 px-3 select-none overflow-hidden">
+
+  <div class="flex items-center justify-between px-2 pt-0.5 pb-3">
+    <div class="flex flex-col items-center"><div class="relative w-[68px] h-[68px] flex items-center justify-center">
+      <svg class="w-full h-full -rotate-90"><circle class="stroke-[#202022]" cx="34" cy="34" fill="transparent" r="26" stroke-width="6.5"></circle><circle id="cpuArc" class="stroke-[#ff0033]" cx="34" cy="34" fill="transparent" r="26" stroke-dasharray="163.36" stroke-dashoffset="163.36" stroke-linecap="round" stroke-width="6.5"></circle></svg>
+      <div class="absolute inset-0 flex flex-col items-center justify-center text-center"><span class="text-[9px] font-medium text-zinc-400 tracking-wider leading-none mb-0.5">CPU</span><span id="cpuValue" class="text-[14px] font-bold text-white tracking-tight leading-none font-mono">--</span></div>
+    </div></div>
+    <div class="flex flex-col items-center"><div class="relative w-[68px] h-[68px] flex items-center justify-center">
+      <svg class="w-full h-full -rotate-90"><circle class="stroke-[#202022]" cx="34" cy="34" fill="transparent" r="26" stroke-width="6.5"></circle><circle id="ramArc" class="stroke-[#ff8c00]" cx="34" cy="34" fill="transparent" r="26" stroke-dasharray="163.36" stroke-dashoffset="163.36" stroke-linecap="round" stroke-width="6.5"></circle></svg>
+      <div class="absolute inset-0 flex flex-col items-center justify-center text-center"><span class="text-[9px] font-medium text-zinc-400 tracking-wider leading-none mb-0.5">RAM</span><span id="ramValue" class="text-[14px] font-bold text-white tracking-tight leading-none font-mono">--</span></div>
+    </div></div>
+    <div class="flex flex-col items-center"><div class="relative w-[68px] h-[68px] flex items-center justify-center">
+      <svg class="w-full h-full -rotate-90"><circle class="stroke-[#202022]" cx="34" cy="34" fill="transparent" r="26" stroke-width="6.5"></circle><circle id="gpuArc" class="stroke-[#5544ff]" cx="34" cy="34" fill="transparent" r="26" stroke-dasharray="163.36" stroke-dashoffset="163.36" stroke-linecap="round" stroke-width="6.5"></circle></svg>
+      <div class="absolute inset-0 flex flex-col items-center justify-center text-center"><span class="text-[9px] font-medium text-zinc-400 tracking-wider leading-none mb-0.5">GPU</span><span id="gpuValue" class="text-[14px] font-bold text-white tracking-tight leading-none font-mono">--</span></div>
+    </div></div>
+  </div>
+
+  <div class="flex flex-col overflow-hidden relative">
+    <div class="flex items-center text-[11px] text-zinc-400 font-normal px-3 pb-1 border-b border-white/[0.06]">
+      <div id="process-name-header" class="flex-1 min-w-0 tracking-tight font-sans text-left">プロセス名</div><div class="w-12 text-right font-mono pr-1 text-[11px]">CPU</div><div class="w-12 text-right font-mono pr-1 text-[11px]">RAM</div>
+    </div>
+    <div class="relative">
+      <div class="space-y-1 pt-1 pb-1 overflow-y-auto text-[11px]" id="process-list" style="max-height:184px;">
+        <div class="px-3 py-2 text-[10px] text-zinc-600 font-mono">プロセスを取得中...</div>
+      </div>
+      <div class="process-fade-overlay"></div>
+      
+    </div>
+  </div>
+
+  <div class="pt-2.5 mt-2 border-t border-white/[0.06] flex flex-col space-y-2">
+    <div class="space-y-1">
+      <div class="flex items-center text-[11px] text-zinc-400 font-normal px-3 pb-0.5 border-b border-white/[0.06]"><div id="port-header" class="w-16 font-mono text-[10px] tracking-wider text-zinc-400">ポート</div><div id="port-process-header" class="flex-1 text-left text-zinc-400 text-[10px]">プロセス / サービス</div></div>
+      <div id="port-list" class="space-y-0.5 text-[11px] pt-0.5">
+        <div class="px-3 py-1 text-[10px] text-zinc-600 font-mono">ポートを取得中...</div>
+      </div>
+    </div>
+
+    <div class="pt-2 border-t border-white/[0.06] flex flex-col space-y-1.5">
+      <div class="flex items-center justify-between px-2 pb-0.5"><div class="flex items-center gap-1.5"><span id="shelf-title" class="text-[10px] font-mono tracking-wider text-zinc-400 uppercase">クイックシェルフ</span><span id="shelf-count" class="bg-white/[0.08] text-zinc-300 text-[9px] font-mono px-2 py-0.5 rounded-full leading-none">0</span></div><div class="flex items-center gap-2"><button id="shelf-add" class="text-[9px] font-mono text-zinc-500 hover:text-zinc-300 cursor-pointer transition-colors hover:underline">追加</button><button id="shelf-clear" class="text-[9px] font-mono text-zinc-500 hover:text-zinc-300 cursor-pointer transition-colors hover:underline">クリア</button></div></div>
+      <div class="space-y-1" id="staged-files">
+      </div>
+    </div>
+  </div>
+</aside>
+</div>
+<script>
+  const send=data=>window.chrome?.webview?.postMessage(data);
+  document.documentElement.addEventListener('pointerenter',()=>send({type:'pointer',inside:true}));
+  document.documentElement.addEventListener('pointerleave',()=>send({type:'pointer',inside:false}));
+</script>
+<script src="app.js"></script>
+</body>
+</html>
+
+
+
