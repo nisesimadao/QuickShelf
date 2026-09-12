@@ -28,6 +28,9 @@ Windowsの右端に常駐する、システム監視・開発用ポート確認�
 
 ![QuickShelf on desktop](docs/screenshots/desktop.jpg)
 
+## ダウンロード
+
+いちばん簡単なのは [GitHub Releases](https://github.com/nisesimadao/QuickShelf/releases) から Windows x64 向けの self-contained ZIP をダウンロードする方法です。Release版には .NET ランタイムを含めているため、**.NET 10を別途インストールする必要はありません**。Microsoft Edge WebView2 Runtime は必要です（現在のWindows 11には通常含まれています）。
 ## 必要環境
 
 - Windows 10 Version 2004以降、またはWindows 11
@@ -87,3 +90,4 @@ powershell -ExecutionPolicy Bypass -File .\scripts\uninstall.ps1
 ## 注意
 
 `Taskkill` は選択したプロセスツリーを即座に終了します。未保存データがあるアプリでは注意してください。
+

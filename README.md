@@ -27,6 +27,9 @@ A compact Windows edge shelf for live system monitoring, local development ports
 
 ![QuickShelf on desktop](docs/screenshots/desktop.jpg)
 
+## Download
+
+The easiest way to try QuickShelf is the self-contained Windows x64 build from [GitHub Releases](https://github.com/nisesimadao/QuickShelf/releases). The release ZIP includes the .NET runtime, so you do **not** need to install .NET 10 separately. Microsoft Edge WebView2 Runtime is still required (included with current Windows 11 installations).
 ## Requirements
 
 - Windows 10 version 2004 or later, or Windows 11
@@ -86,3 +89,4 @@ QuickShelf uses a native WPF host for the edge geometry, window region, animatio
 ## Notes
 
 `Taskkill` immediately terminates the selected process tree. Use it with care for apps containing unsaved work.
+
