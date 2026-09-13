@@ -1,13 +1,16 @@
 $ErrorActionPreference = 'Stop'
 $installDir = Join-Path $env:LOCALAPPDATA 'Programs\QuickShelf'
 $startMenuShortcut = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\QuickShelf.lnk'
-$startupShortcut = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Startup\QuickShelf.lnk'
+$legacyStartupShortcut = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Startup\QuickShelf.lnk'
+$runKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
+$runValueName = 'QuickShelf'
 
 Get-Process QuickShelf -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
 Start-Sleep -Milliseconds 250
 
 Remove-Item $startMenuShortcut -Force -ErrorAction SilentlyContinue
-Remove-Item $startupShortcut -Force -ErrorAction SilentlyContinue
+Remove-Item $legacyStartupShortcut -Force -ErrorAction SilentlyContinue
+Remove-ItemProperty -Path $runKey -Name $runValueName -ErrorAction SilentlyContinue
 Remove-Item $installDir -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host 'QuickShelf uninstalled.'

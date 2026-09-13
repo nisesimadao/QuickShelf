@@ -1,4 +1,4 @@
-﻿# QuickShelf
+# QuickShelf
 
 <p align="center">
   <img src="Assets/QuickShelf.png" width="96" alt="QuickShelf icon">
@@ -21,7 +21,7 @@ A compact Windows edge shelf for live system monitoring, local development ports
 - Drag files from Quick Shelf directly into Explorer, Discord, browsers, editors, DAWs, and other apps using native Windows file drag-and-drop
 - System tray icon with Show / Exit actions
 - Japanese and English UI, selected automatically from the system language
-- Optional install script that adds QuickShelf to the Start menu and Windows Startup
+- Optional install script that adds QuickShelf to the Start menu and registers per-user logon startup
 
 ## Screenshot
 
@@ -66,7 +66,7 @@ QuickShelf is installed to:
 %LOCALAPPDATA%\Programs\QuickShelf
 ```
 
-The installer creates Start menu and Startup shortcuts, then launches QuickShelf.
+The installer creates a Start menu shortcut, registers QuickShelf in the current user Windows Run key for logon startup, then launches QuickShelf.
 
 To uninstall:
 

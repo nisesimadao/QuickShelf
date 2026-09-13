@@ -11,7 +11,7 @@
     <ApplicationIcon>Assets\QuickShelf.ico</ApplicationIcon>
     <AssemblyName>QuickShelf</AssemblyName>
     <Product>QuickShelf</Product>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

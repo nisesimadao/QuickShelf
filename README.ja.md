@@ -1,4 +1,4 @@
-﻿# QuickShelf
+# QuickShelf
 
 <p align="center">
   <img src="Assets/QuickShelf.png" width="96" alt="QuickShelf icon">
@@ -22,7 +22,7 @@ Windowsの右端に常駐する、システム監視・開発用ポート確認�
 - クイックシェルフからExplorer、Discord、ブラウザ、エディタ、DAWなどへWindows標準のファイルD&D
 - システムトレイ常駐（表示 / 終了）
 - OS言語に合わせた日本語 / 英語UI
-- Startメニュー登録とWindows起動時自動起動に対応したインストールスクリプト
+- Startメニュー登録とユーザー単位のWindowsログオン時自動起動に対応したインストールスクリプト
 
 ## スクリーンショット
 
@@ -67,7 +67,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
 %LOCALAPPDATA%\Programs\QuickShelf
 ```
 
-StartメニューとStartupにショートカットを作成し、そのままQuickShelfを起動します。
+Startメニューにショートカットを作成し、HKCU RunへQuickShelfを登録してログオン時に自動起動するよう設定したうえで、そのままQuickShelfを起動します。
 
 アンインストール:
 
