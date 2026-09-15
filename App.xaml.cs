@@ -1,5 +1,6 @@
-﻿using System.Drawing;
+using System.Drawing;
 using System.Globalization;
+using System.IO;
 using System.Windows;
 using Forms = System.Windows.Forms;
 
@@ -14,6 +15,7 @@ public partial class App : System.Windows.Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        WriteStartupLog(e.Args);
         CreateMainWindow();
         CreateTrayIcon();
     }
@@ -23,6 +25,22 @@ public partial class App : System.Windows.Application
         _trayIcon?.Dispose();
         _trayIcon = null;
         base.OnExit(e);
+    }
+
+    private static void WriteStartupLog(string[] args)
+    {
+        try
+        {
+            var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "QuickShelf");
+            Directory.CreateDirectory(dir);
+            var log = Path.Combine(dir, "startup.log");
+            var line = $"{DateTimeOffset.Now:O}\tpid={Environment.ProcessId}\tpath={Environment.ProcessPath}\targs={string.Join(' ', args)}{Environment.NewLine}";
+            File.AppendAllText(log, line);
+        }
+        catch
+        {
+            // Diagnostics must never prevent the app from starting.
+        }
     }
 
     private void CreateMainWindow()

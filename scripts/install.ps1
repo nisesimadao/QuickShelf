@@ -10,14 +10,13 @@ $startMenuShortcut = Join-Path $startMenuDir 'QuickShelf.lnk'
 $legacyStartupShortcut = Join-Path $startupDir 'QuickShelf.lnk'
 $runKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
 $runValueName = 'QuickShelf'
+$taskName = 'QuickShelf Autostart'
 
 if ([string]::IsNullOrWhiteSpace($Source)) {
     if (Test-Path (Join-Path $PSScriptRoot 'QuickShelf.exe')) {
-        # Release ZIP layout: installer sits beside QuickShelf.exe.
         $Source = $PSScriptRoot
     }
     else {
-        # Repository layout.
         $Source = Join-Path $PSScriptRoot '..\artifacts\publish'
     }
 }
@@ -32,9 +31,6 @@ Start-Sleep -Milliseconds 300
 
 New-Item -ItemType Directory -Force -Path $installDir | Out-Null
 Get-ChildItem $installDir -Force -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force
-
-# If installing from a Release ZIP, do not copy the installer/uninstaller files
-# into the app directory; copy the application payload only.
 Get-ChildItem $Source -Force | Where-Object {
     $_.Name -notin @('Install-QuickShelf.ps1', 'Uninstall-QuickShelf.ps1', 'SHA256SUMS.txt')
 } | Copy-Item -Destination $installDir -Recurse -Force
@@ -44,7 +40,6 @@ if (-not (Test-Path $exe)) {
     throw "QuickShelf.exe was not found after installation."
 }
 
-# Start menu shortcut.
 $shell = New-Object -ComObject WScript.Shell
 $shortcut = $shell.CreateShortcut($startMenuShortcut)
 $shortcut.TargetPath = $exe
@@ -53,15 +48,18 @@ $shortcut.IconLocation = "$exe,0"
 $shortcut.Description = 'QuickShelf'
 $shortcut.Save()
 
-# Register per-user logon startup in HKCU Run. This proved more reliable than
-# a Startup-folder shortcut on some Windows 11 configurations.
-New-Item -Path $runKey -Force | Out-Null
-Set-ItemProperty -Path $runKey -Name $runValueName -Value ('"{0}"' -f $exe)
-
-# Remove the old Startup-folder shortcut from v0.1.0 installs to avoid
-# duplicate launches after upgrading.
 Remove-Item $legacyStartupShortcut -Force -ErrorAction SilentlyContinue
+Remove-ItemProperty -Path $runKey -Name $runValueName -ErrorAction SilentlyContinue
+Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue
+
+$identity = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+$action = New-ScheduledTaskAction -Execute $exe -WorkingDirectory $installDir
+$trigger = New-ScheduledTaskTrigger -AtLogOn -User $identity
+$trigger.Delay = 'PT10S'
+$principal = New-ScheduledTaskPrincipal -UserId $identity -LogonType Interactive -RunLevel Limited
+$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -ExecutionTimeLimit (New-TimeSpan -Days 3650)
+Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Description 'Start QuickShelf after user logon.' | Out-Null
 
 Start-Process $exe
 Write-Host "QuickShelf installed to $installDir"
-Write-Host "Windows logon startup registered in HKCU Run: $runValueName"
+Write-Host "Windows logon startup task registered: $taskName"
